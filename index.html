@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Addons Craft - Creado por Ricardo</title>
+  <style>
+    :root {
+      --mc-green: #477a1e;
+      --mc-dirt: #573d26;
+      --mc-bg-overlay: rgba(20, 20, 20, 0.92);
+      --mc-card: #2a2a2a;
+      --mc-text: #ffffff;
+      --mc-accent: #55ff55;
+      --mc-warning: #ffaa00;
+      --mc-danger: #ff4444;
+      --mc-bedrock: #00aaff;
+      --mc-java: #ff5555;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #121212;
+      color: var(--mc-text);
+      margin: 0;
+      padding: 0;
+    }
+
+    .overlay {
+      background-color: var(--mc-bg-overlay);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    header {
+      background-color: var(--mc-dirt);
+      border-bottom: 4px solid var(--mc-green);
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+    }
+
+    .logo {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: var(--mc-accent);
+    }
+
+    nav {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    nav button {
+      background-color: var(--mc-card);
+      border: 1px solid var(--mc-green);
+      color: var(--mc-text);
+      padding: 0.5rem 0.8rem;
+      cursor: pointer;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    nav button.active {
+      background-color: var(--mc-green);
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 1.5rem auto;
+      padding: 0 1rem;
+      flex-grow: 1;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .card-box {
+      background-color: var(--mc-card);
+      padding: 1.5rem;
+      border-radius: 8px;
+      border: 2px solid var(--mc-green);
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.3rem;
+      font-weight: bold;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 0.6rem;
+      border-radius: 4px;
+      border: 1px solid #555;
+      background-color: #111;
+      color: #fff;
+      box-sizing: border-box;
+    }
+
+    option {
+      background-color: #1a1a1a;
+      color: #ffffff;
+    }
+
+    button.btn-main {
+      background-color: var(--mc-green);
+      color: white;
+      border: none;
+      padding: 0.7rem 1.5rem;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 4px;
+      width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .card {
+      background-color: var(--mc-card);
+      border: 2px solid #3a3a3a;
+      border-radius: 8px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .card img.main-img {
+      width: 100%;
+      height: 130px;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+
+    .card-screenshots {
+      display: flex;
+      gap: 5px;
+      margin-top: 8px;
+      overflow-x: auto;
+    }
+
+    .card-screenshots img {
+      width: 45px;
+      height: 45px;
+      object-fit: cover;
+      border-radius: 3px;
+      border: 1px solid #444;
+    }
+
+    .card-title {
+      color: var(--mc-accent);
+      margin: 0.5rem 0 0.2rem 0;
+    }
+
+    .card-author {
+      font-size: 0.8rem;
+      color: #aaa;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-desc {
+      font-size: 0.9rem;
+      color: #ddd;
+      margin-bottom: 0.8rem;
+      word-break: break-word;
+    }
+
+    .edition-badge {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 3px;
+      display: inline-block;
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+    }
+
+    .edition-bedrock { background-color: var(--mc-bedrock); color: #000; }
+    .edition-java { background-color: var(--mc-java); color: #fff; }
+    .edition-both { background-color: var(--mc-accent); color: #000; }
+
+    .btn-download {
+      background-color: var(--mc-green);
+      color: white;
+      text-decoration: none;
+      text-align: center;
+      padding: 0.5rem;
+      border-radius: 4px;
+      font-weight: bold;
+      display: block;
+      cursor: pointer;
+    }
+
+    .btn-delete {
+      background-color: var(--mc-danger);
+      color: white;
+      border: none;
+      padding: 0.4rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+
+    .profile-avatar {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--mc-accent);
+      background-color: #000;
+    }
+
+    #preview-container img {
+      width: 65px;
+      height: 65px;
+      object-fit: cover;
+      border-radius: 4px;
+      border: 1px solid var(--mc-accent);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      background-color: var(--mc-card);
+      border-radius: 8px;
+      border: 2px dashed #444;
+      grid-column: 1 / -1;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+      margin-top: 1.5rem;
+      grid-column: 1 / -1;
+    }
+
+    .pagination button {
+      background-color: var(--mc-card);
+      border: 1px solid #444;
+      color: white;
+      padding: 0.4rem 0.8rem;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .pagination button.active {
+      background-color: var(--mc-green);
+      border-color: var(--mc-accent);
+    }
+
+    footer {
+      background-color: #111;
+      border-top: 2px solid var(--mc-dirt);
+      padding: 1rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+
+<div class="overlay">
+  <header>
+    <div class="logo">⛏️ Addons Craft - Ricardo</div>
+    <nav>
+      <button type="button" onclick="switchTab('exploreTab')" id="btn-exploreTab" class="active">Explorar</button>
+      <button type="button" onclick="switchTab('uploadTab')" id="btn-uploadTab">+ Subir Mod</button>
+      <button type="button" onclick="switchTab('profileTab')" id="btn-profileTab">Mi Perfil</button>
+    </nav>
+  </header>
+
+  <div class="container">
+
+    <div id="exploreTab" class="tab-content active">
+      <h2>Contenido Publicado</h2>
+      
+      <div style="display: flex; gap: 10px; margin-bottom: 1.5rem; flex-wrap: wrap;">
+        <input type="search" id="searchInput" placeholder="Buscar por título..." oninput="filterAddons()" style="flex: 2; min-width: 200px;">
+        <select id="filterCategory" onchange="filterAddons()" style="flex: 1; min-width: 150px;">
+          <option value="all">Todas las categorías</option>
+          <option value="Mods / Addons">Mods / Addons</option>
+          <option value="Mapas">Mapas</option>
+          <option value="Texturas">Texturas</option>
+          <option value="Skins">Skins</option>
+        </select>
+      </div>
+
+      <div class="grid" id="addonsGrid"></div>
+      <div id="paginationContainer" class="pagination"></div>
+    </div>
+
+    <div id="uploadTab" class="tab-content">
+      <div class="card-box">
+        <h2>Subir Nuevo Contenido</h2>
+        <p style="color: var(--mc-warning); font-size: 0.9rem;">🔒 Máximo 200 MB por archivo (.mcaddon, .mcpack, .jar, .zip, .rar).</p>
+        <form id="addonForm">
+          <div class="form-group">
+            <label for="title">Título del Addon/Mod:</label>
+            <input type="text" id="title" maxlength="60" required placeholder="Ej. Ultra Weapons Pack">
+          </div>
+
+          <div class="form-group">
+            <label for="edition">Edición de Minecraft:</label>
+            <select id="edition">
+              <option value="Bedrock Edition">Bedrock Edition (.mcaddon / .mcpack)</option>
+              <option value="Java Edition">Java Edition (.jar / Forge / Fabric)</option>
+              <option value="Java & Bedrock">Compatible con Ambas (Java & Bedrock)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="category">Categoría:</label>
+            <select id="category">
+              <option value="Mods / Addons">Mods / Addons</option>
+              <option value="Mapas">Mapas</option>
+              <option value="Texturas">Texturas</option>
+              <option value="Skins">Skins</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="description">Descripción detallada:</label>
+            <textarea id="description" rows="3" maxlength="500" required placeholder="Escribe de qué trata tu mod..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="image">Imagen de Portada Principal (JPG/PNG/WEBP):</label>
+            <input type="file" id="image" accept="image/png, image/jpeg, image/webp" required>
+          </div>
+
+          <div class="form-group">
+            <label for="screenshots">Capturas de Pantalla Adicionales (Máximo 3 opcionales):</label>
+            <input type="file" id="screenshots" accept="image/png, image/jpeg, image/webp" multiple>
+            <div id="preview-container" style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="modFile">Archivo del Mod (Máx 200 MB):</label>
+            <input type="file" id="modFile" accept=".mcaddon,.mcpack,.jar,.zip,.rar" required>
+          </div>
+
+          <button type="submit" id="submitBtn" class="btn-main">Publicar Inmediatamente</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="profileTab" class="tab-content">
+      <div class="card-box">
+        <div id="profileDisplay" style="display: none;">
+          <div style="display: flex; gap: 1.5rem; align-items: center; margin-bottom: 1rem;">
+            <img id="viewAvatar" src="" class="profile-avatar" alt="Avatar">
+            <div>
+              <h2 id="viewUsername" style="margin: 0; color: var(--mc-accent);"></h2>
+              <p id="viewEmail" style="color: #aaa; margin: 0.2rem 0;"></p>
+              <p id="viewBio" style="margin-top: 0.5rem;"></p>
+            </div>
+          </div>
+          <div id="viewSocials"></div>
+          <hr style="border-color: #444; margin: 1.5rem 0;">
+          <button type="button" onclick="editProfile()" style="background-color: #444; border:none; color:white; padding:0.5rem 1rem; border-radius:4px; cursor:pointer;">Editar Perfil</button>
+          <button type="button" onclick="logout()" style="background-color: var(--mc-danger); border:none; color:white; padding:0.5rem 1rem; border-radius:4px; cursor:pointer; margin-left: 0.5rem;">Cerrar Sesión</button>
+        </div>
+
+        <form id="profileForm">
+          <h2>Configurar Perfil</h2>
+          <div class="form-group">
+            <label for="username">Nombre de Usuario:</label>
+            <input type="text" id="username" maxlength="30" required placeholder="Ricardo">
+          </div>
+
+          <div class="form-group">
+            <label for="email">Correo Electrónico:</label>
+            <input type="email" id="email" required placeholder="tu@correo.com">
+          </div>
+
+          <div class="form-group">
+            <label for="bio">Biografía / Descripción:</label>
+            <textarea id="bio" rows="2" maxlength="200" placeholder="¡Hola! Soy Ricardo y creo mapas y addons."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="avatarFile">Foto de Perfil:</label>
+            <input type="file" id="avatarFile" accept="image/png, image/jpeg, image/webp">
+          </div>
+
+          <h3>Redes Sociales</h3>
+          <div class="form-group"><label>YouTube:</label><input type="url" id="yt" placeholder="https://youtube.com/@canal"></div>
+          <div class="form-group"><label>TikTok:</label><input type="url" id="tt" placeholder="https://tiktok.com/@usuario"></div>
+
+          <button type="submit" class="btn-main">Guardar Perfil</button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <p><strong>Addons Craft</strong> © 2026 - Desarrollado por Ricardo | Comunidad de Recursos para Minecraft</p>
+  </footer>
+</div>
+
+<script>
+  let loadedAddons = [];
+  let filteredAddonsList = [];
+  let currentPage = 1;
+  const itemsPerPage = 6;
+  let db = null;
+
+  function switchTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
+    
+    const targetTab = document.getElementById(tabId);
+    const targetBtn = document.getElementById('btn-' + tabId);
+    
+    if (targetTab) targetTab.classList.add('active');
+    if (targetBtn) targetBtn.classList.add('active');
+    
+    if(tabId === 'exploreTab') loadAddons();
+  }
+
+  const request = indexedDB.open("AddonsCraftDB", 1);
+  request.onupgradeneeded = (e) => {
+    db = e.target.result;
+    if (!db.objectStoreNames.contains("files")) {
+      db.createObjectStore("files");
+    }
+  };
+  request.onsuccess = (e) => {
+    db = e.target.result;
+    loadAddons();
+    renderProfile();
+  };
+  request.onerror = (e) => {
+    console.warn("IndexedDB no disponible, funcionando en modo reducido.");
+    loadAddons();
+    renderProfile();
+  };
+
+  function saveFileToDB(id, fileBlob) {
+    return new Promise((resolve, reject) => {
+      if (!db) return resolve();
+      const tx = db.transaction("files", "readwrite");
+      const store = tx.objectStore("files");
+      const req = store.put(fileBlob, id.toString());
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  function getFileFromDB(id) {
+    return new Promise((resolve, reject) => {
+      if (!db) return resolve(null);
+      const tx = db.transaction("files", "readonly");
+      const store = tx.objectStore("files");
+      const req = store.get(id.toString());
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  function deleteFileFromDB(id) {
+    if (!db) return;
+    const tx = db.transaction("files", "readwrite");
+    tx.objectStore("files").delete(id.toString());
+  }
+
+  function compressImage(file, maxWidth = 800, quality = 0.7) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/webp', quality));
+        };
+        img.onerror = (err) => reject(err);
+      };
+    });
+  }
+
+  function sanitizeHTML(str) {
+    if(!str) return '';
+    const temp = document.createElement('div');
+    temp.textContent = str;
+    return temp.innerHTML;
+  }
+
+  document.getElementById('screenshots').addEventListener('change', function(e) {
+    const container = document.getElementById('preview-container');
+    container.innerHTML = '';
+    const files = Array.from(e.target.files);
+
+    if (files.length > 3) {
+      alert('Solo puedes subir un máximo de 3 capturas adicionales.');
+      this.value = '';
+      return;
+    }
+
+    files.forEach(file => {
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const img = document.createElement('img');
+          img.src = event.target.result;
+          container.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  });
+
+  document.getElementById('modFile').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const allowedExtensions = /(\.mcaddon|\.mcpack|\.jar|\.zip|\.rar)$/i;
+    
+    if (file && !allowedExtensions.exec(file.name)) {
+      alert('Formato no permitido. Solo se aceptan .mcaddon, .mcpack, .jar, .zip o .rar');
+      this.value = '';
+    }
+  });
+
+  const profileForm = document.getElementById('profileForm');
+  
+  function renderProfile() {
+    const user = JSON.parse(localStorage.getItem('user_profile'));
+    if(user) {
+      document.getElementById('profileForm').style.display = 'none';
+      document.getElementById('profileDisplay').style.display = 'block';
+      
+      document.getElementById('viewUsername').innerText = user.username;
+      document.getElementById('viewEmail').innerText = user.email;
+      document.getElementById('viewBio').innerText = user.bio || 'Sin descripción.';
+      document.getElementById('viewAvatar').src = user.avatar || 'https://via.placeholder.com/90?text=Ricardo';
+
+      let socials = '';
+      if(user.yt) socials += `<a href="${encodeURI(user.yt)}" target="_blank" style="color:var(--mc-accent); margin-right:1rem;">YouTube</a>`;
+      if(user.tt) socials += `<a href="${encodeURI(user.tt)}" target="_blank" style="color:var(--mc-accent);">TikTok</a>`;
+      document.getElementById('viewSocials').innerHTML = socials;
+    } else {
+      document.getElementById('profileForm').style.display = 'block';
+      document.getElementById('profileDisplay').style.display = 'none';
+    }
+  }
+
+  profileForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const avatarInput = document.getElementById('avatarFile').files[0];
+    const existingUser = JSON.parse(localStorage.getItem('user_profile')) || {};
+    let avatarBase64 = existingUser.avatar || 'https://via.placeholder.com/90?text=Ricardo';
+
+    if(avatarInput) {
+      avatarBase64 = await compressImage(avatarInput, 200, 0.8);
+    }
+
+    const profile = {
+      username: sanitizeHTML(document.getElementById('username').value),
+      email: sanitizeHTML(document.getElementById('email').value),
+      bio: sanitizeHTML(document.getElementById('bio').value),
+      yt: sanitizeHTML(document.getElementById('yt').value),
+      tt: sanitizeHTML(document.getElementById('tt').value),
+      avatar: avatarBase64
+    };
+
+    localStorage.setItem('user_profile', JSON.stringify(profile));
+    renderProfile();
+  });
+
+  function editProfile() {
+    const user = JSON.parse(localStorage.getItem('user_profile'));
+    if(user) {
+      document.getElementById('username').value = user.username;
+      document.getElementById('email').value = user.email;
+      document.getElementById('bio').value = user.bio || '';
+      document.getElementById('yt').value = user.yt || '';
+      document.getElementById('tt').value = user.tt || '';
+    }
+    document.getElementById('profileForm').style.display = 'block';
+    document.getElementById('profileDisplay').style.display = 'none';
+  }
+
+  function logout() {
+    localStorage.removeItem('user_profile');
+    renderProfile();
+  }
+
+  const addonForm = document.getElementById('addonForm');
+
+  addonForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    btn.innerText = "Procesando y Guardando...";
+    btn.disabled = true;
+
+    try {
+      const user = JSON.parse(localStorage.getItem('user_profile'));
+      const author = user ? user.username : 'Ricardo';
+
+      const title = sanitizeHTML(document.getElementById('title').value);
+      const edition = sanitizeHTML(document.getElementById('edition').value);
+      const category = sanitizeHTML(document.getElementById('category').value);
+      const description = sanitizeHTML(document.getElementById('description').value);
+            const mainImageFile = document.getElementById('image').files[0];
+      const mainImageBase64 = await compressImage(mainImageFile, 800, 0.7);
+
+      const screenshotFiles = Array.from(document.getElementById('screenshots').files).slice(0, 3);
+      const screenshotsBase64 = [];
+      for (const file of screenshotFiles) {
+        const base64 = await compressImage(file, 600, 0.7);
+        screenshotsBase64.push(base64);
+      }
+
+      const modFile = document.getElementById('modFile').files[0];
+      const addonId = Date.now();
+
+      await saveFileToDB(addonId, modFile);
+
+      const newAddon = {
+        id: addonId,
+        title,
+        edition,
+        category,
+        description,
+        author,
+        mainImage: mainImageBase64,
+        screenshots: screenshotsBase64,
+        fileName: modFile.name,
+        date: new Date().toLocaleDateString()
+      };
+
+      const addons = JSON.parse(localStorage.getItem('addons_list')) || [];
+      addons.unshift(newAddon);
+      localStorage.setItem('addons_list', JSON.stringify(addons));
+
+      addonForm.reset();
+      document.getElementById('preview-container').innerHTML = '';
+      alert('¡Contenido publicado exitosamente!');
+      switchTab('exploreTab');
+    } catch (error) {
+      console.error(error);
+      alert('Ocurrió un error al guardar el contenido.');
+    } finally {
+      btn.innerText = "Publicar Inmediatamente";
+      btn.disabled = false;
+    }
+  });
+
+  function loadAddons() {
+    loadedAddons = JSON.parse(localStorage.getItem('addons_list')) || [];
+    filterAddons();
+  }
+
+  function filterAddons() {
+    const searchInput = document.getElementById('searchInput');
+    const filterCat = document.getElementById('filterCategory');
+    if (!searchInput || !filterCat) return;
+
+    const search = searchInput.value.toLowerCase();
+    const cat = filterCat.value;
+
+    filteredAddonsList = loadedAddons.filter(item => {
+      const matchesSearch = item.title.toLowerCase().includes(search);
+      const matchesCategory = cat === 'all' || item.category === cat;
+      return matchesSearch && matchesCategory;
+    });
+
+    currentPage = 1;
+    renderGrid();
+  }
+
+  function renderGrid() {
+    const grid = document.getElementById('addonsGrid');
+    const pagination = document.getElementById('paginationContainer');
+    if (!grid || !pagination) return;
+    
+    grid.innerHTML = '';
+    pagination.innerHTML = '';
+
+    if (filteredAddonsList.length === 0) {
+      grid.innerHTML = `
+        <div class="empty-state">
+          <h3>No hay contenido disponible</h3>
+          <p>Sé el primero en publicar un mod, mapa o textura en la pestaña "Subir Mod".</p>
+        </div>`;
+      return;
+    }
+
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const itemsToDisplay = filteredAddonsList.slice(start, end);
+
+    itemsToDisplay.forEach(item => {
+      let badgeClass = 'edition-bedrock';
+      if (item.edition === 'Java Edition') badgeClass = 'edition-java';
+      if (item.edition === 'Java & Bedrock') badgeClass = 'edition-both';
+
+      let screenshotsHTML = '';
+      if (item.screenshots && item.screenshots.length > 0) {
+        screenshotsHTML = `<div class="card-screenshots">` +
+          item.screenshots.map(src => `<img src="${src}" alt="Screenshot">`).join('') +
+          `</div>`;
+      }
+
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div>
+          <img class="main-img" src="${item.mainImage}" alt="${item.title}">
+          ${screenshotsHTML}
+          <h3 class="card-title">${item.title}</h3>
+          <div class="card-author">Por: <strong>${item.author}</strong></div>
+          <span class="edition-badge ${badgeClass}">${item.edition}</span>
+          <p class="card-desc">${item.description}</p>
+        </div>
+        <div>
+          <button type="button" class="btn-download" onclick="downloadAddon(${item.id}, '${item.fileName}')">📦 Descargar (${item.fileName})</button>
+          <button type="button" class="btn-delete" onclick="deleteAddon(${item.id})">🗑️ Eliminar</button>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+
+    const totalPages = Math.ceil(filteredAddonsList.length / itemsPerPage);
+    if (totalPages > 1) {
+      for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.innerText = i;
+        if (i === currentPage) btn.className = 'active';
+        btn.onclick = () => {
+          currentPage = i;
+          renderGrid();
+        };
+        pagination.appendChild(btn);
+      }
+    }
+  }
+
+  async function downloadAddon(id, fileName) {
+    try {
+      const fileBlob = await getFileFromDB(id);
+      if (!fileBlob) {
+        alert('El archivo no se encuentra disponible.');
+        return;
+      }
+      const url = URL.createObjectURL(fileBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      alert('Error al descargar el archivo.');
+    }
+  }
+
+  function deleteAddon(id) {
+    if (confirm('¿Estás seguro de que deseas eliminar este contenido?')) {
+      deleteFileFromDB(id);
+      loadedAddons = loadedAddons.filter(item => item.id !== id);
+      localStorage.setItem('addons_list', JSON.stringify(loadedAddons));
+      filterAddons();
+    }
+  }
+</script>
+</body>
+</html>
