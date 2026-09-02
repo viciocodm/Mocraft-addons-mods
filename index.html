@@ -423,40 +423,55 @@
       document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
     }
-
-    // Perfil Local
-    function renderProfile() {
-      let user = JSON.parse(localStorage.getItem('user_profile'));
- if (!user) {
-   user = {
-     username: "Usuario Minecraft",
-     email: "correo@ejemplo.com",
-     bio: "Explorador de mods y addons.",
-     avatar: "https://via.placeholder.com/100?text=MC"
-   };
-   localStorage.setItem('user_profile', JSON.stringify(user));
- }
- document.getElementById('profileUsername').innerHTML = user.username + getCreatorBadge(user.username, user.email);
- document.getElementById('profileEmail').innerText = user.email;
- document.getElementById('profileBio').innerText = user.bio;
- document.getElementById('profileAvatar').src = user.avatar;
- }
-    function editProfile() {
-      const user = JSON.parse(localStorage.getItem('user_profile'));
-      const newName = prompt('Nuevo Nombre de Usuario:', user.username);
-      const newBio = prompt('Nueva Biografía:', user.bio);
-      if (newName) user.username = newName;
-      if (newBio) user.bio = newBio;
-      localStorage.setItem('user_profile', JSON.stringify(user));
-      renderProfile();
+// Perfil Local Independiente
+function renderProfile() {
+    let user = JSON.parse(localStorage.getItem('mocraft_current_user'));
+    if (!user) {
+        user = {
+            username: "Nuevo Creador",
+            email: "correo@ejemplo.com",
+            bio: "Explorador de mods y add-ons.",
+            avatar: "https://via.placeholder.com/100?text=MC"
+        };
+        localStorage.setItem('mocraft_current_user', JSON.stringify(user));
     }
+    
+    const usernameEl = document.getElementById('profileUsername');
+    const emailEl = document.getElementById('profileEmail');
+    const bioEl = document.getElementById('profileBio');
+    const avatarEl = document.getElementById('profileAvatar');
 
-    function resetProfile() {
-      if (confirm('¿Cerrar sesión y restablecer perfil local?')) {
-        localStorage.removeItem('user_profile');
-        renderProfile();
-      }
-    }
+    if (usernameEl) usernameEl.innerHTML = user.username + getCreatorBadge(user.username, user.email);
+    if (emailEl) emailEl.innerText = user.email;
+    if (bioEl) bioEl.innerText = user.bio;
+    if (avatarEl) avatarEl.src = user.avatar;
+}
+
+function editProfile() {
+    let user = JSON.parse(localStorage.getItem('mocraft_current_user')) || {
+        username: "Nuevo Creador",
+        email: "correo@ejemplo.com",
+        bio: "Explorador de mods y add-ons.",
+        avatar: "https://via.placeholder.com/100?text=MC"
+    };
+
+    const newName = prompt("Nuevo Nombre de Usuario:", user.username);
+    const newBio = prompt("Nueva Biografía:", user.bio);
+
+    if (newName !== null) user.username = newName;
+    if (newBio !== null) user.bio = newBio;
+
+    localStorage.setItem('mocraft_current_user', JSON.stringify(user));
+    renderProfile();
+}
+
+// Botón de Cerrar Sesión
+document.getElementById('logoutBtn')?.addEventListener('click', () => {
+    localStorage.removeItem('mocraft_current_user');
+    alert('Sesión cerrada correctamente');
+    window.location.reload();
+});
+    
 
     // Compresión de imágenes
     function compressImage(file, maxWidth = 800, quality = 0.7) {
