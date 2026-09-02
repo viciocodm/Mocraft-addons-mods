@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mocraft mods/Addons - java/bedrock</title>
-  <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
@@ -272,12 +271,50 @@
       object-fit: cover;
       margin-bottom: 15px;
     }
+
+    /* Modal Estilo Lista para Edición de Perfil */
+    .profile-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-color: var(--mc-bg-overlay);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 15px;
+    }
+    .profile-modal-content {
+      background-color: var(--mc-surface);
+      border: 1px solid var(--mc-border);
+      padding: 20px;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 420px;
+      max-height: 90vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .profile-modal-content label {
+      font-size: 0.85rem;
+      font-weight: bold;
+      text-align: left;
+    }
+    .profile-modal-content input, .profile-modal-content textarea {
+      background-color: var(--mc-bg);
+      color: var(--mc-text);
+      border: 1px solid var(--mc-border);
+      padding: 8px 10px;
+      border-radius: 4px;
+      width: 100%;
+    }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>Mocraft Mods/Addons - java/bedrock</h1>
+    <h1>Mocraft mods/Addons - java/bedrock</h1>
     <nav>
       <button class="nav-btn" onclick="switchTab('exploreTab')">Explorar</button>
       <button class="nav-btn" onclick="switchTab('uploadTab')">+ Subir Mod</button>
@@ -287,7 +324,6 @@
   </header>
 
   <main>
-    <!-- TAB EXPLORAR -->
     <div id="exploreTab" class="tab-content active">
       <h2>Contenido Publicado</h2>
       <div class="filters-bar">
@@ -312,7 +348,6 @@
       <div id="paginationContainer" class="pagination"></div>
     </div>
 
-    <!-- TAB SUBIR MOD -->
     <div id="uploadTab" class="tab-content">
       <h2>Publicar Nuevo Contenido</h2>
       <form id="addonForm">
@@ -374,18 +409,52 @@
       </form>
     </div>
 
-    <!-- TAB PERFIL -->
     <div id="profileTab" class="tab-content">
       <div class="profile-card">
         <img id="profileAvatar" class="profile-avatar" src="https://via.placeholder.com/100?text=User" alt="Avatar">
         <h2 id="profileUsername">Nombre de Usuario</h2>
         <p id="profileEmail">correo@ejemplo.com</p>
         <p id="profileBio">Sin biografía.</p>
-        <button onclick="editProfile()">Editar Perfil</button>
-        <button style="background-color: var(--mc-danger);" onclick="resetProfile()">Cerrar Sesión</button>
+        <div id="profileSocials" style="font-size: 0.85rem; color: var(--mc-text-muted); margin: 10px 0;"></div>
+        <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
+          <button onclick="editProfileModal()">Editar Perfil</button>
+          <button id="logoutBtn" style="background-color: var(--mc-danger);" onclick="resetProfile()">Cerrar Sesión</button>
+        </div>
       </div>
     </div>
   </main>
+
+  <div id="profileModal" class="profile-modal">
+    <div class="profile-modal-content">
+      <h3 style="margin: 0 0 10px 0; text-align: center;">Editar Perfil</h3>
+      
+      <label>Nombre de Usuario:</label>
+      <input type="text" id="modalUsername" placeholder="Tu nombre">
+
+      <label>Correo Electrónico:</label>
+      <input type="email" id="modalEmail" placeholder="correo@ejemplo.com">
+
+      <label>Biografía:</label>
+      <textarea id="modalBio" rows="2" placeholder="Cuéntanos algo de ti"></textarea>
+
+      <label>Foto de Perfil (URL de la imagen):</label>
+      <input type="text" id="modalAvatar" placeholder="https://...">
+
+      <label>YouTube:</label>
+      <input type="text" id="modalYt" placeholder="Enlace de YouTube">
+
+      <label>TikTok:</label>
+      <input type="text" id="modalTk" placeholder="Usuario de TikTok">
+
+      <label>Discord:</label>
+      <input type="text" id="modalDc" placeholder="Usuario de Discord">
+
+      <div style="display: flex; justify-content: space-between; margin-top: 10px; gap: 10px;">
+        <button type="button" style="background-color: var(--mc-danger); flex: 1;" onclick="closeProfileModal()">Cancelar</button>
+        <button type="button" style="flex: 1;" onclick="saveProfileModal()">Guardar</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     // --- CONEXIÓN DE SUPABASE INTEGRADAS ---
@@ -423,59 +492,86 @@
       document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
     }
-// Perfil Local Independiente
-function renderProfile() {
-    let user = JSON.parse(localStorage.getItem('mocraft_current_user'));
-    if (!user) {
-        user = {
-            username: "Nuevo Creador",
-            email: "correo@ejemplo.com",
-            bio: "Explorador de mods y add-ons.",
-            avatar: "https://via.placeholder.com/100?text=MC"
+
+    // Perfil Local Independiente con formulario en lista
+    function renderProfile() {
+        let user = JSON.parse(localStorage.getItem('mocraft_current_user'));
+        
+        // Si no hay sesión, se deja limpio para que cada usuario lo cree desde 0
+        if (!user) {
+            user = {
+                username: "",
+                email: "",
+                bio: "",
+                avatar: "",
+                yt: "",
+                tk: "",
+                dc: ""
+            };
+        }
+        
+        const usernameEl = document.getElementById('profileUsername');
+        const emailEl = document.getElementById('profileEmail');
+        const bioEl = document.getElementById('profileBio');
+        const avatarEl = document.getElementById('profileAvatar');
+        const socialsEl = document.getElementById('profileSocials');
+
+        if (usernameEl) usernameEl.innerHTML = (user.username || "Sin Nombre") + getCreatorBadge(user.username, user.email);
+        if (emailEl) emailEl.innerText = user.email || "correo@ejemplo.com";
+        if (bioEl) bioEl.innerText = user.bio || "Sin biografía.";
+        if (avatarEl) avatarEl.src = user.avatar || "https://via.placeholder.com/100?text=MC";
+
+        if (socialsEl) {
+            let socialsHTML = '';
+            if (user.yt) socialsHTML += `YouTube: ${user.yt}<br>`;
+            if (user.tk) socialsHTML += `TikTok: ${user.tk}<br>`;
+            if (user.dc) socialsHTML += `Discord: ${user.dc}`;
+            socialsEl.innerHTML = socialsHTML;
+        }
+    }
+
+    function editProfileModal() {
+        let user = JSON.parse(localStorage.getItem('mocraft_current_user')) || {
+            username: "", email: "", bio: "", avatar: "", yt: "", tk: "", dc: ""
         };
+
+        document.getElementById('modalUsername').value = user.username || '';
+        document.getElementById('modalEmail').value = user.email || '';
+        document.getElementById('modalBio').value = user.bio || '';
+        document.getElementById('modalAvatar').value = user.avatar || '';
+        document.getElementById('modalYt').value = user.yt || '';
+        document.getElementById('modalTk').value = user.tk || '';
+        document.getElementById('modalDc').value = user.dc || '';
+
+        document.getElementById('profileModal').style.display = 'flex';
+    }
+
+    function closeProfileModal() {
+        document.getElementById('profileModal').style.display = 'none';
+    }
+
+    function saveProfileModal() {
+        const user = {
+            username: document.getElementById('modalUsername').value.trim(),
+            email: document.getElementById('modalEmail').value.trim(),
+            bio: document.getElementById('modalBio').value.trim(),
+            avatar: document.getElementById('modalAvatar').value.trim(),
+            yt: document.getElementById('modalYt').value.trim(),
+            tk: document.getElementById('modalTk').value.trim(),
+            dc: document.getElementById('modalDc').value.trim()
+        };
+
         localStorage.setItem('mocraft_current_user', JSON.stringify(user));
+        closeProfileModal();
+        renderProfile();
     }
     
-    const usernameEl = document.getElementById('profileUsername');
-    const emailEl = document.getElementById('profileEmail');
-    const bioEl = document.getElementById('profileBio');
-    const avatarEl = document.getElementById('profileAvatar');
-
-    if (usernameEl) usernameEl.innerHTML = user.username + getCreatorBadge(user.username, user.email);
-    if (emailEl) emailEl.innerText = user.email;
-    if (bioEl) bioEl.innerText = user.bio;
-    if (avatarEl) avatarEl.src = user.avatar;
-}
-
-function editProfile() {
-    let user = JSON.parse(localStorage.getItem('mocraft_current_user')) || {
-        username: "Nuevo Creador",
-        email: "correo@ejemplo.com",
-        bio: "Explorador de mods y add-ons.",
-        avatar: "https://via.placeholder.com/100?text=MC"
-    };
-
-    const newName = prompt("Nuevo Nombre de Usuario:", user.username);
-    const newEmail = prompt("Nuevo Correo Electrónico:", user.email);
-    const newBio = prompt("Nueva Biografía:", user.bio);
-    const newAvatar = prompt("Enlace de tu foto de perfil (URL de la imagen):", user.avatar);
-
-    if (newName !== null) user.username = newName;
-    if (newEmail !== null) user.email = newEmail;
-    if (newBio !== null) user.bio = newBio;
-    if (newAvatar !== null && newAvatar.trim() !== "") user.avatar = newAvatar;
-
-    localStorage.setItem('mocraft_current_user', JSON.stringify(user));
-    renderProfile();
-}
-    
-// Botón de Cerrar Sesión
-document.getElementById('logoutBtn')?.addEventListener('click', () => {
-    localStorage.removeItem('mocraft_current_user');
-    alert('Sesión cerrada correctamente');
-    window.location.reload();
-});
-    
+    // Botón de Cerrar Sesión Funcional
+    function resetProfile() {
+        localStorage.removeItem('mocraft_current_user');
+        alert('Sesión cerrada correctamente');
+        window.location.reload();
+    }
 
     // Compresión de imágenes
     function compressImage(file, maxWidth = 800, quality = 0.7) {
@@ -531,8 +627,25 @@ document.getElementById('logoutBtn')?.addEventListener('click', () => {
       btn.disabled = true;
 
       try {
-        const user = JSON.parse(localStorage.getItem('user_profile'));
-        const author = user ? user.username : 'Richard';
+        const user = JSON.parse(localStorage.getItem('mocraft_current_user'));
+        const author = user && user.username ? user.username : 'Anónimo';
+
+        const title = sanitizeHTML(document.getElementById('title').value);
+        const edition = sanitizeHTML(document.getElementById('edition').value);
+        const mcVersion = sanitizeHTML(document.getElementById('mcVersion').value);
+        const category = sanitizeHTML(document.getElementById('category').value);
+        const description = sanitizeHTML(document.getElementById('description').value);
+
+        const mainImageFile = doc    const addonForm = document.getElementById('addonForm');
+    addonForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submitBtn');
+      btn.innerText = "Procesando y Guardando...";
+      btn.disabled = true;
+
+      try {
+        const user = JSON.parse(localStorage.getItem('mocraft_current_user'));
+        const author = user && user.username ? user.username : 'Anónimo';
 
         const title = sanitizeHTML(document.getElementById('title').value);
         const edition = sanitizeHTML(document.getElementById('edition').value);
@@ -658,10 +771,8 @@ document.getElementById('logoutBtn')?.addEventListener('click', () => {
             ${screenshotsHTML}
             <h3 class="card-title">${item.title}</h3>
             <div class="card-author">Por: <strong>${item.author}</strong> ${getCreatorBadge(item.author, 'rbenavides986@gmail.com')}</div>
-            
-              <span class="edition-badge ${badgeClass}">${item.edition}</span>
-              <span class="version-tag">v${item.mcVersion || '1.26'}</span>
-            </div>
+            <span class="edition-badge ${badgeClass}">${item.edition}</span>
+            <span class="version-tag">v${item.mcVersion || '1.26'}</span>
             <p class="card-desc">${item.description}</p>
           </div>
           <div>
@@ -676,7 +787,8 @@ document.getElementById('logoutBtn')?.addEventListener('click', () => {
         grid.appendChild(card);
       });
 
-      const totalPages = Math.ceil(filteredAddonsList.length / itemsPerPage);     if (totalPages > 1) {
+      const totalPages = Math.ceil(filteredAddonsList.length / itemsPerPage);
+      if (totalPages > 1) {
         for (let i = 1; i <= totalPages; i++) {
           const btn = document.createElement('button');
           btn.type = 'button';
@@ -703,7 +815,6 @@ document.getElementById('logoutBtn')?.addEventListener('click', () => {
       }
     }
 
-    // Inicializar al cargar la página
     window.addEventListener('DOMContentLoaded', () => {
       loadAddons();
       renderProfile();
@@ -711,5 +822,3 @@ document.getElementById('logoutBtn')?.addEventListener('click', () => {
   </script>
 </body>
 </html>
-
- 
