@@ -605,7 +605,7 @@
     async function loadAddons() {
       try {
         const { data, error } = await _supabase
-          .from('addons')
+          .from('Mods')
           .select('*')
           .order('id', { ascending: false });
 
@@ -722,7 +722,7 @@
       if (item) {
         const newLikes = (item.likes || 0) + 1;
         const { error } = await _supabase
-          .from('addons')
+          .from('Mods')
           .update({ likes: newLikes })
           .eq('id', id);
 
