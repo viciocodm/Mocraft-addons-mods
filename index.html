@@ -427,21 +427,20 @@
     // Perfil Local
     function renderProfile() {
       let user = JSON.parse(localStorage.getItem('user_profile'));
-      if (!user) {
-        user = {
-          username: "Richard",
-          email: "rbenavides986@gmail.com",
-          bio: "Soy el creador de este sitio web",
-          avatar: "https://via.placeholder.com/100?text=MC"
-        };
-        localStorage.setItem('user_profile', JSON.stringify(user));
-      }
-      document.getElementById('profileUsername').innerHTML = user.username + getCreatorBadge(user.username, user.email);
-      document.getElementById('profileEmail').innerText = user.email;
-      document.getElementById('profileBio').innerText = user.bio;
-      document.getElementById('profileAvatar').src = user.avatar;
-    }
-
+ if (!user) {
+   user = {
+     username: "Usuario Minecraft",
+     email: "correo@ejemplo.com",
+     bio: "Explorador de mods y addons.",
+     avatar: "https://via.placeholder.com/100?text=MC"
+   };
+   localStorage.setItem('user_profile', JSON.stringify(user));
+ }
+ document.getElementById('profileUsername').innerHTML = user.username + getCreatorBadge(user.username, user.email);
+ document.getElementById('profileEmail').innerText = user.email;
+ document.getElementById('profileBio').innerText = user.bio;
+ document.getElementById('profileAvatar').src = user.avatar;
+ }
     function editProfile() {
       const user = JSON.parse(localStorage.getItem('user_profile'));
       const newName = prompt('Nuevo Nombre de Usuario:', user.username);
