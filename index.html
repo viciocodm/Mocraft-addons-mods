@@ -393,6 +393,15 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InljbGFucXZwdmVycWJ5aWRwdmptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzMDYwNzEsImV4cCI6MjEwMzg4MjA3MX0.qyG1dfdMVdb0pkKd_Dv9Y5xoOxx9qBGlKfdscp8oR6E';
 
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    function getCreatorBadge(username, email) {
+      if (
+        username && username.trim().toLowerCase() === "richard" && 
+        email && email.trim().toLowerCase() === "rbenavides986@gmail.com"
+      ) {
+        return `<span style="background: #2e7d32; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-left: 6px;" title="Creador Oficial del Sitio">✔ Creador</span>`;
+      }
+      return '';
+    }
 
     let loadedAddons = [];
     let filteredAddonsList = [];
@@ -427,7 +436,7 @@
         };
         localStorage.setItem('user_profile', JSON.stringify(user));
       }
-      document.getElementById('profileUsername').innerText = user.username;
+      document.getElementById('profileUsername').innerHTML = user.username + getCreatorBadge(user.username, user.email);
       document.getElementById('profileEmail').innerText = user.email;
       document.getElementById('profileBio').innerText = user.bio;
       document.getElementById('profileAvatar').src = user.avatar;
