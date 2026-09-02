@@ -16,14 +16,26 @@
       --mc-danger: #ff4444;
       --mc-bedrock: #00aaff;
       --mc-java: #ff5555;
+      --mc-bg-main: #121212;
+      --mc-input-bg: #111111;
+    }
+
+    body.light-mode {
+      --mc-bg-main: #e0e0e0;
+      --mc-bg-overlay: rgba(245, 245, 245, 0.95);
+      --mc-card: #ffffff;
+      --mc-text: #111111;
+      --mc-accent: #2e7d32;
+      --mc-input-bg: #f0f0f0;
     }
 
     body {
       font-family: Arial, sans-serif;
-      background: #121212;
+      background: var(--mc-bg-main);
       color: var(--mc-text);
       margin: 0;
       padding: 0;
+      transition: background 0.3s, color 0.3s;
     }
 
     .overlay {
@@ -59,6 +71,7 @@
       display: flex;
       gap: 0.5rem;
       flex-wrap: wrap;
+      align-items: center;
     }
 
     nav button {
@@ -73,6 +86,17 @@
 
     nav button.active {
       background-color: var(--mc-green);
+      color: #ffffff;
+    }
+
+    .theme-toggle {
+      background: transparent;
+      border: 1px solid var(--mc-accent);
+      color: var(--mc-text);
+      padding: 0.4rem 0.7rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
     }
 
     .container {
@@ -113,14 +137,9 @@
       padding: 0.6rem;
       border-radius: 4px;
       border: 1px solid #555;
-      background-color: #111;
-      color: #fff;
+      background-color: var(--mc-input-bg);
+      color: var(--mc-text);
       box-sizing: border-box;
-    }
-
-    option {
-      background-color: #1a1a1a;
-      color: #ffffff;
     }
 
     button.btn-main {
@@ -179,13 +198,12 @@
 
     .card-author {
       font-size: 0.8rem;
-      color: #aaa;
+      opacity: 0.8;
       margin-bottom: 0.5rem;
     }
 
     .card-desc {
       font-size: 0.9rem;
-      color: #ddd;
       margin-bottom: 0.8rem;
       word-break: break-word;
     }
@@ -202,6 +220,38 @@
     .edition-bedrock { background-color: var(--mc-bedrock); color: #000; }
     .edition-java { background-color: var(--mc-java); color: #fff; }
     .edition-both { background-color: var(--mc-accent); color: #000; }
+
+    .version-tag {
+      font-size: 0.75rem;
+      background-color: #444;
+      color: #fff;
+      padding: 0.2rem 0.5rem;
+      border-radius: 3px;
+      display: inline-block;
+      margin-left: 0.3rem;
+    }
+
+    .card-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 0.5rem 0;
+    }
+
+    .btn-like {
+      background: transparent;
+      border: 1px solid var(--mc-danger);
+      color: var(--mc-danger);
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .rating-stars {
+      color: var(--mc-warning);
+      font-size: 0.9rem;
+    }
 
     .btn-download {
       background-color: var(--mc-green);
@@ -264,7 +314,7 @@
     .pagination button {
       background-color: var(--mc-card);
       border: 1px solid #444;
-      color: white;
+      color: var(--mc-text);
       padding: 0.4rem 0.8rem;
       cursor: pointer;
       border-radius: 4px;
@@ -272,6 +322,7 @@
 
     .pagination button.active {
       background-color: var(--mc-green);
+      color: #ffffff;
       border-color: var(--mc-accent);
     }
 
@@ -294,6 +345,7 @@
       <button type="button" onclick="switchTab('exploreTab')" id="btn-exploreTab" class="active">Explorar</button>
       <button type="button" onclick="switchTab('uploadTab')" id="btn-uploadTab">+ Subir Mod</button>
       <button type="button" onclick="switchTab('profileTab')" id="btn-profileTab">Mi Perfil</button>
+      <button type="button" class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Modo Oscuro</button>
     </nav>
   </header>
 
@@ -303,13 +355,22 @@
       <h2>Contenido Publicado</h2>
       
       <div style="display: flex; gap: 10px; margin-bottom: 1.5rem; flex-wrap: wrap;">
-        <input type="search" id="searchInput" placeholder="Buscar por título..." oninput="filterAddons()" style="flex: 2; min-width: 200px;">
-        <select id="filterCategory" onchange="filterAddons()" style="flex: 1; min-width: 150px;">
+        <input type="search" id="searchInput" placeholder="Buscar por título..." oninput="filterAddons()" style="flex: 2; min-width: 180px;">
+        
+        <select id="filterCategory" onchange="filterAddons()" style="flex: 1; min-width: 130px;">
           <option value="all">Todas las categorías</option>
           <option value="Mods / Addons">Mods / Addons</option>
           <option value="Mapas">Mapas</option>
           <option value="Texturas">Texturas</option>
           <option value="Skins">Skins</option>
+        </select>
+
+        <select id="filterVersion" onchange="filterAddons()" style="flex: 1; min-width: 130px;">
+          <option value="all">Todas las versiones</option>
+          <option value="1.21">Minecraft 1.21</option>
+          <option value="1.20">Minecraft 1.20</option>
+          <option value="1.19">Minecraft 1.19</option>
+          <option value="Otra">Otra versión</option>
         </select>
       </div>
 
@@ -333,6 +394,16 @@
               <option value="Bedrock Edition">Bedrock Edition (.mcaddon / .mcpack)</option>
               <option value="Java Edition">Java Edition (.jar / Forge / Fabric)</option>
               <option value="Java & Bedrock">Compatible con Ambas (Java & Bedrock)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="mcVersion">Versión de Minecraft:</label>
+            <select id="mcVersion">
+              <option value="1.21">Minecraft 1.21</option>
+              <option value="1.20">Minecraft 1.20</option>
+              <option value="1.19">Minecraft 1.19</option>
+              <option value="Otra">Otra / Todas</option>
             </select>
           </div>
 
@@ -379,7 +450,7 @@
             <img id="viewAvatar" src="" class="profile-avatar" alt="Avatar">
             <div>
               <h2 id="viewUsername" style="margin: 0; color: var(--mc-accent);"></h2>
-              <p id="viewEmail" style="color: #aaa; margin: 0.2rem 0;"></p>
+              <p id="viewEmail" style="opacity: 0.8; margin: 0.2rem 0;"></p>
               <p id="viewBio" style="margin-top: 0.5rem;"></p>
             </div>
           </div>
@@ -434,6 +505,18 @@
   const itemsPerPage = 6;
   let db = null;
 
+  function toggleTheme() {
+    document.body.classList.toggle('light-mode');
+    const isLight = document.body.classList.contains('light-mode');
+    document.getElementById('themeBtn').innerText = isLight ? '☀️ Modo Claro' : '🌙 Modo Oscuro';
+    localStorage.setItem('theme_mode', isLight ? 'light' : 'dark');
+  }
+
+  if (localStorage.getItem('theme_mode') === 'light') {
+    document.body.classList.add('light-mode');
+    document.getElementById('themeBtn').innerText = '☀️ Modo Claro';
+  }
+
   function switchTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
@@ -460,7 +543,6 @@
     renderProfile();
   };
   request.onerror = (e) => {
-    console.warn("IndexedDB no disponible, funcionando en modo reducido.");
     loadAddons();
     renderProfile();
   };
@@ -577,6 +659,7 @@
 
       let socials = '';
       if(user.yt) socials += `<a href="${encodeURI(user.yt)}" target="_blank" style="color:var(--mc-accent); margin-right:1rem;">YouTube</a>`;
+      if(user.      if(user.yt) socials += `<a href="${encodeURI(user.yt)}" target="_blank" style="color:var(--mc-accent); margin-right:1rem;">YouTube</a>`;
       if(user.tt) socials += `<a href="${encodeURI(user.tt)}" target="_blank" style="color:var(--mc-accent);">TikTok</a>`;
       document.getElementById('viewSocials').innerHTML = socials;
     } else {
@@ -640,9 +723,11 @@
 
       const title = sanitizeHTML(document.getElementById('title').value);
       const edition = sanitizeHTML(document.getElementById('edition').value);
+      const mcVersion = sanitizeHTML(document.getElementById('mcVersion').value);
       const category = sanitizeHTML(document.getElementById('category').value);
       const description = sanitizeHTML(document.getElementById('description').value);
-            const mainImageFile = document.getElementById('image').files[0];
+
+      const mainImageFile = document.getElementById('image').files[0];
       const mainImageBase64 = await compressImage(mainImageFile, 800, 0.7);
 
       const screenshotFiles = Array.from(document.getElementById('screenshots').files).slice(0, 3);
@@ -661,9 +746,11 @@
         id: addonId,
         title,
         edition,
+        mcVersion,
         category,
         description,
         author,
+        likes: 0,
         mainImage: mainImageBase64,
         screenshots: screenshotsBase64,
         fileName: modFile.name,
@@ -679,7 +766,6 @@
       alert('¡Contenido publicado exitosamente!');
       switchTab('exploreTab');
     } catch (error) {
-      console.error(error);
       alert('Ocurrió un error al guardar el contenido.');
     } finally {
       btn.innerText = "Publicar Inmediatamente";
@@ -695,19 +781,32 @@
   function filterAddons() {
     const searchInput = document.getElementById('searchInput');
     const filterCat = document.getElementById('filterCategory');
-    if (!searchInput || !filterCat) return;
+    const filterVer = document.getElementById('filterVersion');
+    if (!searchInput || !filterCat || !filterVer) return;
 
     const search = searchInput.value.toLowerCase();
     const cat = filterCat.value;
+    const ver = filterVer.value;
 
     filteredAddonsList = loadedAddons.filter(item => {
       const matchesSearch = item.title.toLowerCase().includes(search);
       const matchesCategory = cat === 'all' || item.category === cat;
-      return matchesSearch && matchesCategory;
+      const matchesVersion = ver === 'all' || item.mcVersion === ver;
+      return matchesSearch && matchesCategory && matchesVersion;
     });
 
     currentPage = 1;
     renderGrid();
+  }
+
+  function toggleLike(id) {
+    const addons = JSON.parse(localStorage.getItem('addons_list')) || [];
+    const item = addons.find(a => a.id === id);
+    if (item) {
+      item.likes = (item.likes || 0) + 1;
+      localStorage.setItem('addons_list', JSON.stringify(addons));
+      loadAddons();
+    }
   }
 
   function renderGrid() {
@@ -751,10 +850,17 @@
           ${screenshotsHTML}
           <h3 class="card-title">${item.title}</h3>
           <div class="card-author">Por: <strong>${item.author}</strong></div>
-          <span class="edition-badge ${badgeClass}">${item.edition}</span>
+          <div>
+            <span class="edition-badge ${badgeClass}">${item.edition}</span>
+            <span class="version-tag">v${item.mcVersion || '1.20'}</span>
+          </div>
           <p class="card-desc">${item.description}</p>
         </div>
         <div>
+          <div class="card-actions">
+            <button type="button" class="btn-like" onclick="toggleLike(${item.id})">❤️ ${item.likes || 0}</button>
+            <span class="rating-stars">★★★★★</span>
+          </div>
           <button type="button" class="btn-download" onclick="downloadAddon(${item.id}, '${item.fileName}')">📦 Descargar (${item.fileName})</button>
           <button type="button" class="btn-delete" onclick="deleteAddon(${item.id})">🗑️ Eliminar</button>
         </div>
@@ -794,7 +900,6 @@
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (err) {
-      console.error(err);
       alert('Error al descargar el archivo.');
     }
   }
