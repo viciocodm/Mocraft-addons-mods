@@ -639,8 +639,8 @@
             <img class="main-img" src="${item.mainImage}" alt="${item.title}">
             ${screenshotsHTML}
             <h3 class="card-title">${item.title}</h3>
-            <div class="card-author">Por: <strong>${item.author}</strong></div>
-            <div>
+            <div class="card-author">Por: <strong>${item.author}</strong> ${getCreatorBadge(item.author, 'rbenavides986@gmail.com')}</div>
+            
               <span class="edition-badge ${badgeClass}">${item.edition}</span>
               <span class="version-tag">v${item.mcVersion || '1.26'}</span>
             </div>
