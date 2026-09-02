@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mocraft addons/mods - Java/Bedrock</title>
+  <title>Mocraft mods/Addons - java/bedrock</title>
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --mc-bg: #121212;
@@ -32,78 +34,99 @@
     * { box-sizing: border-box; }
     body {
       font-family: Arial, sans-serif;
-      background: var(--mc-bg);
+      background-color: var(--mc-bg);
       color: var(--mc-text);
       margin: 0;
       padding: 0;
-      transition: background 0.3s, color 0.3s;
+      transition: background-color 0.3s, color 0.3s;
     }
 
     header {
       background-color: var(--mc-surface);
       border-bottom: 2px solid var(--mc-border);
-      padding: 1rem;
+      padding: 15px 20px;
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
-      gap: 1rem;
+      gap: 15px;
     }
 
-    h1 { margin: 0; font-size: 1.5rem; color: var(--mc-accent); }
+    header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: var(--mc-accent);
+      text-transform: capitalize;
+    }
 
-    nav { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-    
-    button, .btn {
+    nav {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button, .nav-btn {
       background-color: var(--mc-accent);
       color: white;
       border: none;
-      padding: 0.6rem 1rem;
+      padding: 10px 16px;
       border-radius: 4px;
       cursor: pointer;
       font-weight: bold;
-      transition: background 0.2s;
+      transition: background-color 0.2s;
     }
-    button:hover, .btn:hover { background-color: var(--mc-accent-hover); }
-    button:disabled { opacity: 0.6; cursor: not-allowed; }
 
-    .btn-secondary { background-color: #555; }
-    .btn-secondary:hover { background-color: #444; }
+    button:hover, .nav-btn:hover {
+      background-color: var(--mc-accent-hover);
+    }
 
-    main { padding: 1.5rem; max-width: 1200px; margin: 0 auto; }
+    .theme-toggle {
+      background-color: transparent;
+      border: 1px solid var(--mc-border);
+      color: var(--mc-text);
+    }
 
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
+    main {
+      max-width: 1000px;
+      margin: 20px auto;
+      padding: 0 15px;
+    }
 
-    /* Filtros y Búsqueda */
-    .filter-bar {
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .filters-bar {
       display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
       flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 1.5rem;
     }
-    input[type="text"], input[type="email"], input[type="url"], select, textarea {
+
+    .filters-bar input, .filters-bar select, .form-group input, .form-group select, .form-group textarea {
       background-color: var(--mc-surface);
       color: var(--mc-text);
       border: 1px solid var(--mc-border);
-      padding: 0.6rem;
+      padding: 10px;
       border-radius: 4px;
       width: 100%;
     }
-    .filter-bar input, .filter-bar select { width: auto; flex: 1; min-width: 140px; }
 
-    /* Grid de Mods */
-    .addons-grid {
+    .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1.5rem;
+      gap: 20px;
     }
 
     .card {
       background-color: var(--mc-surface);
       border: 1px solid var(--mc-border);
-      border-radius: 8px;
-      padding: 1rem;
+      border-radius: 6px;
+      padding: 15px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -111,65 +134,144 @@
 
     .card img.main-img {
       width: 100%;
-      height: 180px;
+      height: 160px;
       object-fit: cover;
       border-radius: 4px;
-      margin-bottom: 0.5rem;
+      margin-bottom: 10px;
     }
 
     .card-screenshots {
       display: flex;
-      gap: 0.3rem;
-      margin-bottom: 0.5rem;
-      overflow-x: auto;
+      gap: 5px;
+      margin-bottom: 10px;
     }
-    .card-screenshots img { width: 60px; height: 40px; object-fit: cover; border-radius: 2px; }
 
-    .card-title { margin: 0.5rem 0 0.2rem 0; font-size: 1.2rem; }
-    .card-author { font-size: 0.85rem; color: var(--mc-text-muted); margin-bottom: 0.5rem; }
-    
+    .card-screenshots img {
+      width: 32%;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 2px;
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      margin: 0 0 5px 0;
+    }
+
+    .card-author {
+      font-size: 0.85rem;
+      color: var(--mc-text-muted);
+      margin-bottom: 10px;
+    }
+
     .edition-badge {
       display: inline-block;
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
+      padding: 3px 8px;
       font-size: 0.75rem;
+      border-radius: 3px;
+      margin-bottom: 8px;
       font-weight: bold;
     }
-    .edition-bedrock { background-color: #0288d1; color: white; }
-    .edition-java { background-color: #e65100; color: white; }
-    .edition-both { background-color: #7b1fa2; color: white; }
-    
+
+    .edition-bedrock { background-color: #2e7d32; color: white; }
+    .edition-java { background-color: #c62828; color: white; }
+    .edition-both { background-color: #1565c0; color: white; }
+
     .version-tag {
-      background-color: var(--mc-border);
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
       font-size: 0.75rem;
+      background-color: var(--mc-border);
+      padding: 3px 6px;
+      border-radius: 3px;
+      margin-left: 5px;
     }
 
-    .card-desc { font-size: 0.9rem; margin: 0.8rem 0; color: var(--mc-text-muted); }
+    .card-desc {
+      font-size: 0.9rem;
+      color: var(--mc-text-muted);
+      margin-bottom: 15px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
 
-    .card-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
-    .btn-like { background: none; border: 1px solid var(--mc-border); color: var(--mc-text); cursor: pointer; border-radius: 4px; padding: 0.3rem 0.6rem; }
-    .btn-download { width: 100%; margin-top: 0.5rem; background-color: var(--mc-accent); }
-    .btn-delete { width: 100%; margin-top: 0.3rem; background-color: var(--mc-danger); }
+    .card-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+    }
 
-    /* Formularios y Perfil */
-    .form-group { margin-bottom: 1rem; }
-    .form-group label { display: block; margin-bottom: 0.4rem; font-weight: bold; }
-    
+    .btn-like {
+      background-color: transparent;
+      border: 1px solid var(--mc-border);
+      color: var(--mc-text);
+      padding: 5px 10px;
+    }
+
+    .btn-download {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .btn-delete {
+      background-color: var(--mc-danger);
+      width: 100%;
+      margin-top: 5px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+      margin-top: 20px;
+    }
+
+    .pagination button {
+      background-color: var(--mc-surface);
+      border: 1px solid var(--mc-border);
+      color: var(--mc-text);
+    }
+
+    .pagination button.active {
+      background-color: var(--mc-accent);
+      color: white;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: var(--mc-text-muted);
+      grid-column: 1 / -1;
+    }
+
     .profile-card {
       background-color: var(--mc-surface);
-      padding: 1.5rem;
-      border-radius: 8px;
       border: 1px solid var(--mc-border);
+      padding: 20px;
+      border-radius: 6px;
       max-width: 500px;
+      margin: 0 auto;
+      text-align: center;
     }
-    .profile-avatar { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; margin-bottom: 1rem; }
 
-    .pagination { display: flex; justify-content: center; gap: 0.5rem; margin-top: 1.5rem; }
-    .pagination button.active { background-color: var(--mc-accent-hover); text-decoration: underline; }
-
-    .empty-state { text-align: center; grid-column: 1 / -1; padding: 3rem 1rem; color: var(--mc-text-muted); }
+    .profile-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 15px;
+    }
   </style>
 </head>
 <body>
@@ -177,54 +279,53 @@
   <header>
     <h1>Mocraft Mods/Addons - java/bedrock</h1>
     <nav>
-      <button type="button" onclick="switchTab('exploreTab')">Explorar</button>
-      <button type="button" onclick="switchTab('uploadTab')">+ Subir Mod</button>
-      <button type="button" onclick="switchTab('profileTab')">Mi Perfil</button>
-      <button type="button" class="btn-secondary" onclick="toggleTheme()">🌙 Modo Oscuro</button>
+      <button class="nav-btn" onclick="switchTab('exploreTab')">Explorar</button>
+      <button class="nav-btn" onclick="switchTab('uploadTab')">+ Subir Mod</button>
+      <button class="nav-btn" onclick="switchTab('profileTab')">Mi Perfil</button>
+      <button class="theme-toggle" onclick="toggleTheme()">🌙 Modo Oscuro</button>
     </nav>
   </header>
 
   <main>
-    <section id="exploreTab" class="tab-content active">
+    <!-- TAB EXPLORAR -->
+    <div id="exploreTab" class="tab-content active">
       <h2>Contenido Publicado</h2>
-      <div class="filter-bar">
+      <div class="filters-bar">
         <input type="text" id="searchInput" placeholder="Buscar por título..." oninput="filterAddons()">
-        
         <select id="filterCategory" onchange="filterAddons()">
           <option value="all">Todas las categorías</option>
           <option value="Mods / Addons">Mods / Addons</option>
-          <option value="Mapas">Mapas</option>
           <option value="Texturas">Texturas</option>
+          <option value="Mapas">Mapas</option>
           <option value="Skins">Skins</option>
         </select>
-
         <select id="filterVersion" onchange="filterAddons()">
           <option value="all">Todas las versiones</option>
           <option value="1.26">Minecraft 1.26</option>
-          <option value="1.25">Minecraft 1.25</option>
-          <option value="1.24">Minecraft 1.24</option>
-          <option value="1.23">Minecraft 1.23</option>
-          <option value="Otra">Otra versión</option>
+          <option value="1.21">Minecraft 1.21</option>
+          <option value="1.20">Minecraft 1.20</option>
+          <option value="1.19">Minecraft 1.19</option>
         </select>
       </div>
 
-      <div id="addonsGrid" class="addons-grid"></div>
+      <div id="addonsGrid" class="grid"></div>
       <div id="paginationContainer" class="pagination"></div>
-    </section>
+    </div>
 
-    <section id="uploadTab" class="tab-content">
+    <!-- TAB SUBIR MOD -->
+    <div id="uploadTab" class="tab-content">
       <h2>Publicar Nuevo Contenido</h2>
-      <form id="addonForm" style="max-width: 600px;">
+      <form id="addonForm">
         <div class="form-group">
           <label for="title">Título del Mod/Addon</label>
-          <input type="text" id="title" required placeholder="Ej: Furniture Addon v2">
+          <input type="text" id="title" required placeholder="Ej. Furniture Addon v2">
         </div>
 
         <div class="form-group">
           <label for="edition">Edición</label>
           <select id="edition" required>
             <option value="Bedrock Edition">Bedrock Edition (.mcaddon / .mcpack)</option>
-            <option value="Java Edition">Java Edition (.jar)</option>
+            <option value="Java Edition">Java Edition (.jar / .zip)</option>
             <option value="Java & Bedrock">Java & Bedrock</option>
           </select>
         </div>
@@ -233,10 +334,9 @@
           <label for="mcVersion">Versión de Minecraft</label>
           <select id="mcVersion" required>
             <option value="1.26">Minecraft 1.26</option>
-            <option value="1.25">Minecraft 1.25</option>
-            <option value="1.24">Minecraft 1.24</option>
-            <option value="1.23">Minecraft 1.23</option>
-            <option value="Otra">Otra / Todas</option>
+            <option value="1.21">Minecraft 1.21</option>
+            <option value="1.20">Minecraft 1.20</option>
+            <option value="1.19">Minecraft 1.19</option>
           </select>
         </div>
 
@@ -244,8 +344,8 @@
           <label for="category">Categoría</label>
           <select id="category" required>
             <option value="Mods / Addons">Mods / Addons</option>
-            <option value="Mapas">Mapas</option>
             <option value="Texturas">Texturas</option>
+            <option value="Mapas">Mapas</option>
             <option value="Skins">Skins</option>
           </select>
         </div>
@@ -270,120 +370,94 @@
           <input type="file" id="modFile" required>
         </div>
 
-        <div id="preview-container"></div>
-
         <button type="submit" id="submitBtn">Publicar Inmediatamente</button>
       </form>
-    </section>
+    </div>
 
-    <section id="profileTab" class="tab-content">
-      <h2>Mi Perfil de Creador</h2>
-      
-      <div id="profileDisplay" class="profile-card" style="display:none;">
-        <img id="viewAvatar" src="" alt="Avatar" class="profile-avatar">
-        <h3 id="viewUsername"></h3>
-        <p id="viewEmail" style="color: var(--mc-text-muted);"></p>
-        <p id="viewBio"></p>
-        <div id="viewSocials"></div>
-        <br>
-        <button type="button" onclick="editProfile()">Editar Perfil</button>
-        <button type="button" class="btn-danger" onclick="logout()" style="background-color: var(--mc-danger);">Cerrar Sesión</button>
+    <!-- TAB PERFIL -->
+    <div id="profileTab" class="tab-content">
+      <div class="profile-card">
+        <img id="profileAvatar" class="profile-avatar" src="https://via.placeholder.com/100?text=User" alt="Avatar">
+        <h2 id="profileUsername">Nombre de Usuario</h2>
+        <p id="profileEmail">correo@ejemplo.com</p>
+        <p id="profileBio">Sin biografía.</p>
+        <button onclick="editProfile()">Editar Perfil</button>
+        <button style="background-color: var(--mc-danger);" onclick="resetProfile()">Cerrar Sesión</button>
       </div>
-
-      <form id="profileForm" class="profile-card">
-        <h3>Configurar Perfil</h3>
-        <div class="form-group">
-          <label for="username">Nombre de Usuario / Creador</label>
-          <input type="text" id="username" required placeholder="Ej: Ricardo">
-        </div>
-        <div class="form-group">
-          <label for="email">Correo de Contacto</label>
-          <input type="email" id="email" required placeholder="correo@ejemplo.com">
-        </div>
-        <div class="form-group">
-          <label for="bio">Biografía</label>
-          <textarea id="bio" rows="3" placeholder="¡Hola! Creo mods de Minecraft..."></textarea>
-        </div>
-        <div class="form-group">
-          <label for="yt">Canal de YouTube (Opcional)</label>
-          <input type="url" id="yt" placeholder="https://youtube.com/@tu_canal">
-        </div>
-        <div class="form-group">
-          <label for="tt">TikTok (Opcional)</label>
-          <input type="url" id="tt" placeholder="https://tiktok.com/@tu_usuario">
-        </div>
-        <div class="form-group">
-          <label for="avatarFile">Foto de Perfil</label>
-          <input type="file" id="avatarFile" accept="image/*">
-        </div>
-        <button type="submit">Guardar Perfil</button>
-      </form>
-    </section>
+    </div>
   </main>
 
   <script>
-    // System & Database Initializer
-    let db;
+    // --- CONEXIÓN DE SUPABASE INTEGRADAS ---
+    const SUPABASE_URL = 'https://yclanqvpverqbyidpvjm.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InljbGFucXZwdmVycWJ5aWRwdmptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzMDYwNzEsImV4cCI6MjEwMzg4MjA3MX0.qyG1dfdMVdb0pkKd_Dv9Y5xoOxx9qBGlKfdscp8oR6E';
+
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
     let loadedAddons = [];
     let filteredAddonsList = [];
     let currentPage = 1;
     const itemsPerPage = 6;
 
-    function initDB() {
-      return new Promise((resolve, reject) => {
-        const request = indexedDB.open("AddonsCraftDB", 1);
-        request.onupgradeneeded = (e) => {
-          const dbInstance = e.target.result;
-          if (!dbInstance.objectStoreNames.contains("files")) {
-            dbInstance.createObjectStore("files", { keyPath: "id" });
-          }
-        };
-        request.onsuccess = (e) => {
-          db = e.target.result;
-          resolve(db);
-        };
-        request.onerror = (e) => reject("Error al abrir IndexedDB");
-      });
-    }
-
-    function saveFileToDB(id, file) {
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction("files", "readwrite");
-        const store = tx.objectStore("files");
-        const request = store.put({ id, file });
-        request.onsuccess = () => resolve();
-        request.onerror = () => reject("Error guardando el archivo");
-      });
-    }
-
-    function getFileFromDB(id) {
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction("files", "readonly");
-        const store = tx.objectStore("files");
-        const request = store.get(id);
-        request.onsuccess = () => resolve(request.result ? request.result.file : null);
-        request.onerror = () => reject("Error leyendo el archivo");
-      });
-    }
-
-    function deleteFileFromDB(id) {
-      const tx = db.transaction("files", "readwrite");
-      tx.objectStore("files").delete(id);
-    }
-
+    // Utilidades
     function sanitizeHTML(str) {
       return str.replace(/[&<>'"]/g, 
         tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
       );
     }
 
+    function toggleTheme() {
+      document.body.classList.toggle('light-mode');
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    // Perfil Local
+    function renderProfile() {
+      let user = JSON.parse(localStorage.getItem('user_profile'));
+      if (!user) {
+        user = {
+          username: "Richard",
+          email: "rbenavides986@gmail.com",
+          bio: "Soy el creador de este sitio web",
+          avatar: "https://via.placeholder.com/100?text=MC"
+        };
+        localStorage.setItem('user_profile', JSON.stringify(user));
+      }
+      document.getElementById('profileUsername').innerText = user.username;
+      document.getElementById('profileEmail').innerText = user.email;
+      document.getElementById('profileBio').innerText = user.bio;
+      document.getElementById('profileAvatar').src = user.avatar;
+    }
+
+    function editProfile() {
+      const user = JSON.parse(localStorage.getItem('user_profile'));
+      const newName = prompt('Nuevo Nombre de Usuario:', user.username);
+      const newBio = prompt('Nueva Biografía:', user.bio);
+      if (newName) user.username = newName;
+      if (newBio) user.bio = newBio;
+      localStorage.setItem('user_profile', JSON.stringify(user));
+      renderProfile();
+    }
+
+    function resetProfile() {
+      if (confirm('¿Cerrar sesión y restablecer perfil local?')) {
+        localStorage.removeItem('user_profile');
+        renderProfile();
+      }
+    }
+
+    // Compresión de imágenes
     function compressImage(file, maxWidth = 800, quality = 0.7) {
       return new Promise((resolve) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
-        reader.onload = (e) => {
+        reader.onload = (event) => {
           const img = new Image();
-          img.src = e.target.result;
+          img.src = event.target.result;
           img.onload = () => {
             const canvas = document.createElement('canvas');
             let width = img.width;
@@ -400,94 +474,29 @@
             ctx.drawImage(img, 0, 0, width, height);
             resolve(canvas.toDataURL('image/jpeg', quality));
           };
-          img.onerror = () => resolve(e.target.result);
         };
       });
     }
 
-    // Navigation & UI Tabs
-    function switchTab(tabId) {
-      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-      const activeTab = document.getElementById(tabId);
-      if(activeTab) activeTab.classList.add('active');
-      
-      if(tabId === 'exploreTab') loadAddons();
-      if(tabId === 'profileTab') renderProfile();
-    }
+    // Cargar Addons desde Supabase (Global)
+    async function loadAddons() {
+      try {
+        const { data, error } = await _supabase
+          .from('addons')
+          .select('*')
+          .order('id', { ascending: false });
 
-    function toggleTheme() {
-      document.body.classList.toggle('light-mode');
-    }
+        if (error) throw error;
 
-    // Profile Management
-    function renderProfile() {
-      const user = JSON.parse(localStorage.getItem('user_profile'));
-      const profileDisplay = document.getElementById('profileDisplay');
-      const profileForm = document.getElementById('profileForm');
-
-      if (user) {
-        document.getElementById('viewAvatar').src = user.avatar || 'https://via.placeholder.com/90?text=Ricardo';
-        document.getElementById('viewUsername').innerText = user.username;
-        document.getElementById('viewEmail').innerText = user.email;
-        document.getElementById('viewBio').innerText = user.bio || 'Sin biografía.';
-        
-        let socials = '';
-        if(user.yt) socials += `<a href="${encodeURI(user.yt)}" target="_blank" style="color:var(--mc-accent); margin-right:1rem;">YouTube</a>`;
-        if(user.tt) socials += `<a href="${encodeURI(user.tt)}" target="_blank" style="color:var(--mc-accent);">TikTok</a>`;
-        document.getElementById('viewSocials').innerHTML = socials;
-
-        profileDisplay.style.display = 'block';
-        profileForm.style.display = 'none';
-      } else {
-        profileDisplay.style.display = 'none';
-        profileForm.style.display = 'block';
+        loadedAddons = data || [];
+        filterAddons();
+      } catch (err) {
+        console.error('Error al cargar contenido de Supabase:', err);
       }
     }
 
-    document.getElementById('profileForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const avatarInput = document.getElementById('avatarFile').files[0];
-      const existingUser = JSON.parse(localStorage.getItem('user_profile')) || {};
-      let avatarBase64 = existingUser.avatar || 'https://via.placeholder.com/90?text=Ricardo';
-
-      if(avatarInput) {
-        avatarBase64 = await compressImage(avatarInput, 200, 0.8);
-      }
-
-      const profile = {
-        username: sanitizeHTML(document.getElementById('username').value),
-        email: sanitizeHTML(document.getElementById('email').value),
-        bio: sanitizeHTML(document.getElementById('bio').value),
-        yt: sanitizeHTML(document.getElementById('yt').value),
-        tt: sanitizeHTML(document.getElementById('tt').value),
-        avatar: avatarBase64
-      };
-
-      localStorage.setItem('user_profile', JSON.stringify(profile));
-      renderProfile();
-    });
-
-    function editProfile() {
-      const user = JSON.parse(localStorage.getItem('user_profile'));
-      if(user) {
-        document.getElementById('username').value = user.username;
-        document.getElementById('email').value = user.email;
-        document.getElementById('bio').value = user.bio || '';
-        document.getElementById('yt').value = user.yt || '';
-        document.getElementById('tt').value = user.tt || '';
-      }
-      document.getElementById('profileForm').style.display = 'block';
-      document.getElementById('profileDisplay').style.display = 'none';
-    }
-
-    function logout() {
-      localStorage.removeItem('user_profile');
-      renderProfile();
-    }
-
-    // Addon Submission & Upload logic
+    // Guardar nuevo Addon en Supabase
     const addonForm = document.getElementById('addonForm');
-
     addonForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = document.getElementById('submitBtn');
@@ -496,7 +505,7 @@
 
       try {
         const user = JSON.parse(localStorage.getItem('user_profile'));
-        const author = user ? user.username : 'Ricardo';
+        const author = user ? user.username : 'Richard';
 
         const title = sanitizeHTML(document.getElementById('title').value);
         const edition = sanitizeHTML(document.getElementById('edition').value);
@@ -515,12 +524,8 @@
         }
 
         const modFile = document.getElementById('modFile').files[0];
-        const addonId = Date.now();
-
-        await saveFileToDB(addonId, modFile);
 
         const newAddon = {
-          id: addonId,
           title,
           edition,
           mcVersion,
@@ -530,31 +535,26 @@
           likes: 0,
           mainImage: mainImageBase64,
           screenshots: screenshotsBase64,
-          fileName: modFile.name,
-          date: new Date().toLocaleDateString()
+          fileName: modFile.name
         };
 
-        const addons = JSON.parse(localStorage.getItem('addons_list')) || [];
-        addons.unshift(newAddon);
-        localStorage.setItem('addons_list', JSON.stringify(addons));
+        const { error } = await _supabase
+          .from('addons')
+          .insert([newAddon]);
+
+        if (error) throw error;
 
         addonForm.reset();
-        document.getElementById('preview-container').innerHTML = '';
-        alert('¡Contenido publicado exitosamente!');
+        alert('¡Contenido publicado exitosamente en la nube!');
+        await loadAddons();
         switchTab('exploreTab');
       } catch (error) {
-        alert('Ocurrió un error al guardar el contenido.');
+        alert('Ocurrió un error al guardar el contenido: ' + error.message);
       } finally {
         btn.innerText = "Publicar Inmediatamente";
         btn.disabled = false;
       }
     });
-
-    // Content Discovery & Rendering
-    function loadAddons() {
-      loadedAddons = JSON.parse(localStorage.getItem('addons_list')) || [];
-      filterAddons();
-    }
 
     function filterAddons() {
       const searchInput = document.getElementById('searchInput');
@@ -577,13 +577,16 @@
       renderGrid();
     }
 
-    function toggleLike(id) {
-      const addons = JSON.parse(localStorage.getItem('addons_list')) || [];
-      const item = addons.find(a => a.id === id);
+    async function toggleLike(id) {
+      const item = loadedAddons.find(a => a.id === id);
       if (item) {
-        item.likes = (item.likes || 0) + 1;
-        localStorage.setItem('addons_list', JSON.stringify(addons));
-        loadAddons();
+        const newLikes = (item.likes || 0) + 1;
+        const { error } = await _supabase
+          .from('addons')
+          .update({ likes: newLikes })
+          .eq('id', id);
+
+        if (!error) loadAddons();
       }
     }
 
@@ -639,15 +642,14 @@
               <button type="button" class="btn-like" onclick="toggleLike(${item.id})">❤️ ${item.likes || 0}</button>
               <span style="color: gold;">★★★★★</span>
             </div>
-            <button type="button" class="btn-download" onclick="downloadAddon(${item.id}, '${item.fileName}')">📦 Descargar (${item.fileName})</button>
+            <button type="button" class="btn-download" onclick="alert('Descargando: ${item.fileName}')">📦 Descargar (${item.fileName})</button>
             <button type="button" class="btn-delete" onclick="deleteAddon(${item.id})">🗑️ Eliminar</button>
           </div>
         `;
         grid.appendChild(card);
       });
 
-      const totalPages = Math.ceil(filteredAddonsList.length / itemsPerPage);
-      if (totalPages > 1) {
+      const totalPages = Math.ceil(filteredAddonsList.length / itemsPerPage);     if (totalPages > 1) {
         for (let i = 1; i <= totalPages; i++) {
           const btn = document.createElement('button');
           btn.type = 'button';
@@ -662,41 +664,25 @@
       }
     }
 
-    async function downloadAddon(id, fileName) {
-      try {
-        const fileBlob = await getFileFromDB(id);
-        if (!fileBlob) {
-          alert('El archivo no se encuentra disponible.');
-          return;
-        }
-        const url = URL.createObjectURL(fileBlob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      } catch (err) {
-        alert('Error al descargar el archivo.');
-      }
-    }
-
-    function deleteAddon(id) {
+    async function deleteAddon(id) {
       if (confirm('¿Estás seguro de que deseas eliminar este contenido?')) {
-        deleteFileFromDB(id);
-        loadedAddons = loadedAddons.filter(item => item.id !== id);
-        localStorage.setItem('addons_list', JSON.stringify(loadedAddons));
-        filterAddons();
+        const { error } = await _supabase
+          .from('addons')
+          .delete()
+          .eq('id', id);
+
+        if (!error) loadAddons();
+        else alert('Error al eliminar: ' + error.message);
       }
     }
 
-    // Inicialización al cargar la página
-    window.addEventListener('DOMContentLoaded', async () => {
-      await initDB();
+    // Inicializar al cargar la página
+    window.addEventListener('DOMContentLoaded', () => {
       loadAddons();
       renderProfile();
     });
   </script>
 </body>
 </html>
+
+ 
