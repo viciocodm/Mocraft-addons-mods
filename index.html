@@ -679,7 +679,7 @@
         };
 
         const { error } = await _supabase
-          .from('addons')
+          .from('Mods')
           .insert([newAddon]);
 
         if (error) throw error;
@@ -806,7 +806,7 @@
     async function deleteAddon(id) {
       if (confirm('¿Estás seguro de que deseas eliminar este contenido?')) {
         const { error } = await _supabase
-          .from('addons')
+          .from('Mods')
           .delete()
           .eq('id', id);
 
