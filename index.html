@@ -272,7 +272,6 @@
       margin-bottom: 15px;
     }
 
-    /* Modal Estilo Lista para Edición de Perfil */
     .profile-modal {
       display: none;
       position: fixed;
@@ -457,11 +456,11 @@
   </div>
 
   <script>
-    // --- CONEXIÓN DE SUPABASE INTEGRADAS ---
     const SUPABASE_URL = 'https://yclanqvpverqbyidpvjm.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InljbGFucXZwdmVycWJ5aWRwdmptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzMDYwNzEsImV4cCI6MjEwMzg4MjA3MX0.qyG1dfdMVdb0pkKd_Dv9Y5xoOxx9qBGlKfdscp8oR6E';
 
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
     function getCreatorBadge(username, email) {
       if (
         username && username.trim().toLowerCase() === "richard" && 
@@ -477,7 +476,6 @@
     let currentPage = 1;
     const itemsPerPage = 6;
 
-    // Utilidades
     function sanitizeHTML(str) {
       return str.replace(/[&<>'"]/g, 
         tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
@@ -493,21 +491,11 @@
       document.getElementById(tabId).classList.add('active');
     }
 
-    // Perfil Local Independiente con formulario en lista
     function renderProfile() {
         let user = JSON.parse(localStorage.getItem('mocraft_current_user'));
         
-        // Si no hay sesión, se deja limpio para que cada usuario lo cree desde 0
         if (!user) {
-            user = {
-                username: "",
-                email: "",
-                bio: "",
-                avatar: "",
-                yt: "",
-                tk: "",
-                dc: ""
-            };
+            user = { username: "", email: "", bio: "", avatar: "", yt: "", tk: "", dc: "" };
         }
         
         const usernameEl = document.getElementById('profileUsername');
@@ -566,14 +554,12 @@
         renderProfile();
     }
     
-    // Botón de Cerrar Sesión Funcional
     function resetProfile() {
         localStorage.removeItem('mocraft_current_user');
         alert('Sesión cerrada correctamente');
         window.location.reload();
     }
 
-    // Compresión de imágenes
     function compressImage(file, maxWidth = 800, quality = 0.7) {
       return new Promise((resolve) => {
         const reader = new FileReader();
@@ -601,7 +587,6 @@
       });
     }
 
-    // Cargar Addons desde Supabase (Global)
     async function loadAddons() {
       try {
         const { data, error } = await _supabase
@@ -618,25 +603,7 @@
       }
     }
 
-    // Guardar nuevo Addon en Supabase
     const addonForm = document.getElementById('addonForm');
-    addonForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const btn = document.getElementById('submitBtn');
-      btn.innerText = "Procesando y Guardando...";
-      btn.disabled = true;
-
-      try {
-        const user = JSON.parse(localStorage.getItem('mocraft_current_user'));
-        const author = user && user.username ? user.username : 'Anónimo';
-
-        const title = sanitizeHTML(document.getElementById('title').value);
-        const edition = sanitizeHTML(document.getElementById('edition').value);
-        const mcVersion = sanitizeHTML(document.getElementById('mcVersion').value);
-        const category = sanitizeHTML(document.getElementById('category').value);
-        const description = sanitizeHTML(document.getElementById('description').value);
-
-        const mainImageFile = doc    const addonForm = document.getElementById('addonForm');
     addonForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = document.getElementById('submitBtn');
@@ -672,24 +639,23 @@
           category,
           description,
           author,
-          likes: 0,
           mainImage: mainImageBase64,
           screenshots: screenshotsBase64,
-          fileName: modFile.name
+          fileName: modFile ? modFile.name : 'archivo',
+          fileSize: modFile ? (modFile.size / (1024 * 1024)).toFixed(2) + ' MB' : '0 MB',
+          likes: 0
         };
 
-        const { error } = await _supabase
-          .from('Mods')
-          .insert([newAddon]);
-
+        const { error } = await _supabase.from('Mods').insert([newAddon]);
         if (error) throw error;
 
+        alert('¡Contenido publicado con éxito!');
         addonForm.reset();
-        alert('¡Contenido publicado exitosamente en la nube!');
-        await loadAddons();
         switchTab('exploreTab');
-      } catch (error) {
-        alert('Ocurrió un error al guardar el contenido: ' + error.message);
+        loadAddons();
+      } catch (err) {
+        console.error('Error al subir el contenido:', err);
+        alert('Hubo un error al publicar el contenido. Revisa la consola.');
       } finally {
         btn.innerText = "Publicar Inmediatamente";
         btn.disabled = false;
@@ -697,128 +663,140 @@
     });
 
     function filterAddons() {
-      const searchInput = document.getElementById('searchInput');
-      const filterCat = document.getElementById('filterCategory');
-      const filterVer = document.getElementById('filterVersion');
-      if (!searchInput || !filterCat || !filterVer) return;
-
-      const search = searchInput.value.toLowerCase();
-      const cat = filterCat.value;
-      const ver = filterVer.value;
+      const searchTxt = document.getElementById('searchInput').value.toLowerCase();
+      const catVal = document.getElementById('filterCategory').value;
+      const verVal = document.getElementById('filterVersion').value;
 
       filteredAddonsList = loadedAddons.filter(item => {
-        const matchesSearch = item.title.toLowerCase().includes(search);
-        const matchesCategory = cat === 'all' || item.category === cat;
-        const matchesVersion = ver === 'all' || item.mcVersion === ver;
-        return matchesSearch && matchesCategory && matchesVersion;
+        const matchesTitle = item.title && item.title.toLowerCase().includes(searchTxt);
+        const matchesCat = (catVal === 'all') || (item.category === catVal);
+        const matchesVer = (verVal === 'all') || (item.mcVersion === verVal);
+        return matchesTitle && matchesCat && matchesVer;
       });
 
       currentPage = 1;
-      renderGrid();
+      renderAddonsGrid();
+      renderPagination();
     }
 
-    async function toggleLike(id) {
-      const item = loadedAddons.find(a => a.id === id);
-      if (item) {
-        const newLikes = (item.likes || 0) + 1;
-        const { error } = await _supabase
-          .from('Mods')
-          .update({ likes: newLikes })
-          .eq('id', id);
-
-        if (!error) loadAddons();
-      }
-    }
-
-    function renderGrid() {
+    function renderAddonsGrid() {
       const grid = document.getElementById('addonsGrid');
-      const pagination = document.getElementById('paginationContainer');
-      if (!grid || !pagination) return;
-      
       grid.innerHTML = '';
-      pagination.innerHTML = '';
 
       if (filteredAddonsList.length === 0) {
-        grid.innerHTML = `
-          <div class="empty-state">
-            <h3>No hay contenido disponible</h3>
-            <p>Sé el primero en publicar un mod, mapa o textura en la pestaña "Subir Mod".</p>
-          </div>`;
+        grid.innerHTML = `<div class="empty-state">No se encontró contenido publicado.</div>`;
         return;
       }
 
       const start = (currentPage - 1) * itemsPerPage;
       const end = start + itemsPerPage;
-      const itemsToDisplay = filteredAddonsList.slice(start, end);
+      const pageItems = filteredAddonsList.slice(start, end);
 
-      itemsToDisplay.forEach(item => {
-        let badgeClass = 'edition-bedrock';
-        if (item.edition === 'Java Edition') badgeClass = 'edition-java';
-        if (item.edition === 'Java & Bedrock') badgeClass = 'edition-both';
+      pageItems.forEach(item => {
+        let editionClass = 'edition-bedrock';
+        if (item.edition === 'Java Edition') editionClass = 'edition-java';
+        if (item.edition === 'Java & Bedrock') editionClass = 'edition-both';
 
         let screenshotsHTML = '';
         if (item.screenshots && item.screenshots.length > 0) {
-          screenshotsHTML = `<div class="card-screenshots">` +
-            item.screenshots.map(src => `<img src="${src}" alt="Screenshot">`).join('') +
+          screenshotsHTML = `<div class="card-screenshots">` + 
+            item.screenshots.map(s => `<img src="${s}" alt="Screen">`).join('') + 
             `</div>`;
         }
+
+        const currentUser = JSON.parse(localStorage.getItem('mocraft_current_user'));
+        const isAuthor = currentUser && currentUser.username && currentUser.username === item.author;
 
         const card = document.createElement('div');
         card.className = 'card';
         card.innerHTML = `
           <div>
-            <img class="main-img" src="${item.mainImage}" alt="${item.title}">
+            ${item.mainImage ? `<img class="main-img" src="${item.mainImage}" alt="Main">` : ''}
             ${screenshotsHTML}
+            <div>
+              <span class="edition-badge ${editionClass}">${item.edition}</span>
+              <span class="version-tag">${item.mcVersion}</span>
+            </div>
             <h3 class="card-title">${item.title}</h3>
-            <div class="card-author">Por: <strong>${item.author}</strong> ${getCreatorBadge(item.author, 'rbenavides986@gmail.com')}</div>
-            <span class="edition-badge ${badgeClass}">${item.edition}</span>
-            <span class="version-tag">v${item.mcVersion || '1.26'}</span>
+            <div class="card-author">Por: ${item.author}</div>
             <p class="card-desc">${item.description}</p>
           </div>
           <div>
             <div class="card-actions">
-              <button type="button" class="btn-like" onclick="toggleLike(${item.id})">❤️ ${item.likes || 0}</button>
-              <span style="color: gold;">★★★★★</span>
+              <button class="btn-like" onclick="likeAddon(${item.id})">❤️ ${item.likes || 0}</button>
+              <span style="font-size: 0.8rem; color: var(--mc-text-muted);">${item.fileSize || ''}</span>
             </div>
-            <button type="button" class="btn-download" onclick="alert('Descargando: ${item.fileName}')">📦 Descargar (${item.fileName})</button>
-            <button type="button" class="btn-delete" onclick="deleteAddon(${item.id})">🗑️ Eliminar</button>
+            <button class="btn-download" onclick="alert('Descargando archivo: ${item.fileName || 'Mod'}')">Descargar</button>
+            ${isAuthor ? `<button class="btn-delete" onclick="deleteAddon(${item.id})">Eliminar</button>` : ''}
           </div>
         `;
         grid.appendChild(card);
       });
+    }
+
+    function renderPagination() {
+      const paginationContainer = document.getElementById('paginationContainer');
+      paginationContainer.innerHTML = '';
 
       const totalPages = Math.ceil(filteredAddonsList.length / itemsPerPage);
-      if (totalPages > 1) {
-        for (let i = 1; i <= totalPages; i++) {
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.innerText = i;
-          if (i === currentPage) btn.className = 'active';
-          btn.onclick = () => {
-            currentPage = i;
-            renderGrid();
-          };
-          pagination.appendChild(btn);
-        }
+      if (totalPages <= 1) return;
+
+      for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement('button');
+        btn.innerText = i;
+        if (i === currentPage) btn.className = 'active';
+        btn.onclick = () => {
+          currentPage = i;
+          renderAddonsGrid();
+          renderPagination();
+        };
+        paginationContainer.appendChild(btn);
+      }
+    }
+
+    async function likeAddon(id) {
+      const item = loadedAddons.find(a => a.id === id);
+      if (!item) return;
+      const newLikes = (item.likes || 0) + 1;
+
+      try {
+        const { error } = await _supabase
+          .from('Mods')
+          .update({ likes: newLikes })
+          .eq('id', id);
+
+        if (error) throw error;
+        item.likes = newLikes;
+        renderAddonsGrid();
+      } catch (err) {
+        console.error('Error al dar like:', err);
       }
     }
 
     async function deleteAddon(id) {
-      if (confirm('¿Estás seguro de que deseas eliminar este contenido?')) {
+      if (!confirm('¿Estás seguro de que deseas eliminar este contenido?')) return;
+
+      try {
         const { error } = await _supabase
           .from('Mods')
           .delete()
           .eq('id', id);
 
-        if (!error) loadAddons();
-        else alert('Error al eliminar: ' + error.message);
+        if (error) throw error;
+        alert('Contenido eliminado correctamente.');
+        loadAddons();
+      } catch (err) {
+        console.error('Error al eliminar:', err);
+        alert('No se pudo eliminar el contenido.');
       }
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
-      loadAddons();
+    window.onload = () => {
       renderProfile();
-    });
+      loadAddons();
+    };
   </script>
 </body>
 </html>
+
+  
