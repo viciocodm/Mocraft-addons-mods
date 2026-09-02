@@ -599,7 +599,7 @@
         loadedAddons = data || [];
         filterAddons();
       } catch (err) {
-        console.error('Error al cargar contenido de Supabase:', err);
+        console.error('Error al cargar contenido de Supabase:', err.message || err);
       }
     }
 
@@ -621,18 +621,19 @@
         const description = sanitizeHTML(document.getElementById('description').value);
 
         const mainImageFile = document.getElementById('image').files[0];
-        const mainImageBase64 = await compressImage(mainImageFile, 800, 0.7);
+        const mainImageBase64 = await compressImage(mainImageFile, 600, 0.6);
 
         const screenshotFiles = Array.from(document.getElementById('screenshots').files).slice(0, 3);
         const screenshotsBase64 = [];
         for (const file of screenshotFiles) {
-          const base64 = await compressImage(file, 600, 0.7);
+          const base64 = await compressImage(file, 500, 0.6);
           screenshotsBase64.push(base64);
         }
 
         const modFile = document.getElementById('modFile').files[0];
 
         const newAddon = {
+            const newAddon = {
           title,
           edition,
           mcVersion,
@@ -654,8 +655,8 @@
         switchTab('exploreTab');
         loadAddons();
       } catch (err) {
-        console.error('Error al subir el contenido:', err);
-        alert('Hubo un error al publicar el contenido. Revisa la consola.');
+        console.error('Error al subir el contenido:', err.message || err);
+        alert('Hubo un error al publicar el contenido. Revisa que las columnas en Supabase coincidan con los datos y que el tamaño de las imágenes no sature la base de datos.');
       } finally {
         btn.innerText = "Publicar Inmediatamente";
         btn.disabled = false;
@@ -698,7 +699,7 @@
         if (item.edition === 'Java & Bedrock') editionClass = 'edition-both';
 
         let screenshotsHTML = '';
-        if (item.screenshots && item.screenshots.length > 0) {
+        if (item.screenshots && Array.isArray(item.screenshots) && item.screenshots.length > 0) {
           screenshotsHTML = `<div class="card-screenshots">` + 
             item.screenshots.map(s => `<img src="${s}" alt="Screen">`).join('') + 
             `</div>`;
@@ -798,5 +799,3 @@
   </script>
 </body>
 </html>
-
-  
