@@ -456,15 +456,19 @@ function editProfile() {
     };
 
     const newName = prompt("Nuevo Nombre de Usuario:", user.username);
+    const newEmail = prompt("Nuevo Correo Electrónico:", user.email);
     const newBio = prompt("Nueva Biografía:", user.bio);
+    const newAvatar = prompt("Enlace de tu foto de perfil (URL de la imagen):", user.avatar);
 
     if (newName !== null) user.username = newName;
+    if (newEmail !== null) user.email = newEmail;
     if (newBio !== null) user.bio = newBio;
+    if (newAvatar !== null && newAvatar.trim() !== "") user.avatar = newAvatar;
 
     localStorage.setItem('mocraft_current_user', JSON.stringify(user));
     renderProfile();
 }
-
+    
 // Botón de Cerrar Sesión
 document.getElementById('logoutBtn')?.addEventListener('click', () => {
     localStorage.removeItem('mocraft_current_user');
